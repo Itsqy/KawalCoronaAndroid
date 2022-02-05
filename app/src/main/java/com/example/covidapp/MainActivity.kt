@@ -12,7 +12,7 @@ import com.example.covidapp.api.ApiConfig
 import com.example.covidapp.fragment.BerandaFragment
 import com.example.covidapp.fragment.ProvinsiFragment
 import com.example.covidapp.fragment.infoAppFragment
-import com.example.covidapp.model.ResponseCorona
+import com.example.covidapp.model.ResponseItem
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_beranda.*
 import retrofit2.Call
@@ -34,13 +34,37 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        showDataIndonesia()
         val actionBar: ActionBar? = supportActionBar
         actionBar?.hide()
 
         setupBottomNav()
 
+
     }
+
+    private fun showDataIndonesia() {
+        ApiConfig.instance.getCorona().enqueue(object : Callback<ArrayList<ResponseItem>> {
+            override fun onResponse(
+                call: Call<ArrayList<ResponseItem>>,
+                response: Response<ArrayList<ResponseItem>>
+            ) {
+                if (response.isSuccessful) {
+                    val indonesiaResponse = response.body()!![0]
+                    tv_sembuh.text = indonesiaResponse.sembuh
+                    tv_meninggal.text = indonesiaResponse.meninggal
+                    tv_positif.text = indonesiaResponse.positif
+                    tv_rawat.text = indonesiaResponse.dirawat
+                }
+            }
+
+            override fun onFailure(call: Call<ArrayList<ResponseItem>>, t: Throwable) {
+                Toast.makeText(applicationContext, "${t.message}", Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
 
     private fun setupBottomNav() {
 
@@ -72,7 +96,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
 
 
     private fun callFrag(i: Int, fragment: Fragment) {
